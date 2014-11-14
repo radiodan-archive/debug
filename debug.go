@@ -143,7 +143,9 @@ func fetchPidFile(appName string) (output int64) {
 	}
 
 	output, err = strconv.ParseInt(string(file), 10, 0)
-	log.Println(fmt.Sprintf("%s:%s:%i", path, string(file), output))
+	failOnError(err, "FAIL")
+
+	log.Println(fmt.Sprintf("%s:%s:%d", path, string(file), output))
 
 	return
 }
