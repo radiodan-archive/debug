@@ -54,7 +54,8 @@ func fetchDebugInfo() DebugInfo {
 	d := DebugInfo{Timestamp: time.Now()}
 
 	// fetch ip address(es)
-	d.Hostname, d.Addresses = ipAddresses()
+	d.Hostname = hostname()
+	d.Addresses = ipAddresses()
 	// test for internet connection
 	d.InternetConnection = checkConnection()
 	// log active apps
@@ -63,12 +64,51 @@ func fetchDebugInfo() DebugInfo {
 	return d
 }
 
-func ipAddresses() (hostname string, addrs []string) {
+func hostname() (hostname string) {
 	hostname, err := os.Hostname()
 	failOnError(err, "Could not determine hostname")
 
-	addrs, err = net.LookupHost(hostname)
-	failOnError(err, "Could not determine IP")
+	return
+}
+
+func ipAddresses() (ips []string) {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		fmt.Printf("[!] %s", err)
+		return
+	}
+
+	for _, iface := range ifaces {
+		if iface.Flags&net.FlagUp == 0 {
+			continue // interface down
+		}
+		if iface.Flags&net.FlagLoopback != 0 {
+			continue // loopback interface
+		}
+		addrs, err := iface.Addrs()
+		if err != nil {
+			fmt.Printf("[!] %s", err)
+			return
+		}
+		for _, addr := range addrs {
+			var ip net.IP
+			switch v := addr.(type) {
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
+			}
+			if ip == nil || ip.IsLoopback() {
+				continue
+			}
+			ip = ip.To4()
+			if ip == nil {
+				continue // not an ipv4 address
+			}
+			ips = append(ips, ip.String())
+		}
+	}
+
 	return
 }
 
