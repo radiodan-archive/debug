@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"syscall"
@@ -117,6 +118,7 @@ func checkApp(appName string) (app DebugApplication) {
 func fetchDeployFile(appName string) (output string) {
 	pathTemplate := "/opt/radiodan/apps/%s/current/.deploy"
 	path := fmt.Sprintf(pathTemplate, appName)
+
 	file, err := ioutil.ReadFile(path)
 
 	if err != nil {
@@ -130,6 +132,21 @@ func fetchDeployFile(appName string) (output string) {
 }
 
 func fetchLogFile(appName string) (output string) {
+	path := fmt.Sprintf("/var/log/radiodan-%s.log", appName)
+	_, err := os.Stat(path)
+
+	if err != nil {
+		log.Printf("[!] Could not open file %s", path)
+		return
+	}
+
+	cmd := "tail -n 100 " + path
+	stdout, err := exec.Command(cmd).Output()
+
+	if err == nil {
+		output = string(stdout)
+	}
+
 	return
 }
 
