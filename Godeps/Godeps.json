@@ -1,0 +1,5 @@
+{
+	"ImportPath": "github.com/radiodan/debug",
+	"GoVersion": "go1.3.3",
+	"Deps": []
+}
