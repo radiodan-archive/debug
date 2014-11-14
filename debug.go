@@ -146,7 +146,9 @@ func fetchPidFile(appName string) (output int64) {
 	pidString := strings.Trim(string(file), "\n")
 	output, err = strconv.ParseInt(pidString, 10, 0)
 
-	failOnError(err, "Could not parse pid as integer")
+	if err != nil {
+		log.Println("[!] Could not parse pid as integer", pidString)
+	}
 
 	return
 }
