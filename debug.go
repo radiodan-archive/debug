@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -142,10 +143,10 @@ func fetchPidFile(appName string) (output int64) {
 		return
 	}
 
-	output, err = strconv.ParseInt(string(file), 10, 0)
-	failOnError(err, "FAIL")
+	pidString := strings.Trim(string(file), "\n")
+	output, err = strconv.ParseInt(pidString, 10, 0)
 
-	log.Println(fmt.Sprintf("%s:%s:%d", path, string(file), output))
+	failOnError(err, "Could not parse pid as integer")
 
 	return
 }
