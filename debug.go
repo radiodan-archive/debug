@@ -143,7 +143,9 @@ func fetchLogFile(appName string) (output string) {
 	cmd := "tail -n 100 " + path
 	stdout, err := exec.Command(cmd).Output()
 
-	if err == nil {
+	if err != nil {
+		log.Printf("[!] Command failed: %s", err)
+	} else {
 		output = string(stdout)
 	}
 
