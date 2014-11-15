@@ -25,7 +25,8 @@ type DebugInfo struct {
 }
 
 type DebugApplication struct {
-	Name       string
+	Name string
+	// TODO: this should be it's own struct
 	DeployFile string
 	LogFile    string
 	PidFile    int64
@@ -35,6 +36,8 @@ type DebugApplication struct {
 func main() {
 	port := parseFlags()
 	http.HandleFunc("/", debugResponse)
+	// TODO
+	//http.HandleFunc("/download", downloadResponse)
 
 	log.Printf("Debug server running on http://127.0.0.1:%d", port)
 	http.ListenAndServe(fmt.Sprintf("127.0.0.1:%d", port), nil)
@@ -156,6 +159,7 @@ func checkApp(appName string) (app DebugApplication) {
 }
 
 func fetchDeployFile(appName string) (output string) {
+	// TODO: pathTemplate should be a method on the struct
 	pathTemplate := "/opt/radiodan/apps/%s/current/.deploy"
 	path := fmt.Sprintf(pathTemplate, appName)
 
@@ -172,6 +176,7 @@ func fetchDeployFile(appName string) (output string) {
 }
 
 func fetchLogFile(appName string) (output string) {
+	// TODO: logpath should be a method on the struct
 	path := fmt.Sprintf("/var/log/radiodan-%s.log", appName)
 	_, err := os.Stat(path)
 
@@ -192,6 +197,7 @@ func fetchLogFile(appName string) (output string) {
 }
 
 func fetchPidFile(appName string) (output int64) {
+	// TODO: pidpath should be a method on the struct
 	pathTemplate := "/var/run/radiodan/radiodan-%s.pid"
 	path := fmt.Sprintf(pathTemplate, appName)
 	file, err := ioutil.ReadFile(path)
