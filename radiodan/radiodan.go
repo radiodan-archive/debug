@@ -15,16 +15,17 @@ type DebugInfo struct {
 
 type RadiodanApplication struct {
 	Name      string
-	LogTail   string
 	Pid       int64
 	IsRunning bool
 	Deploy    Deploy
+	LogTail   string
 }
 
 type Deploy struct {
-	Name   string
-	Ref    string
-	Commit string
+	Name      string
+	Ref       string
+	Commit    string
+	CreatedAt string
 }
 
 func (r RadiodanApplication) DeployFile() (path string) {
