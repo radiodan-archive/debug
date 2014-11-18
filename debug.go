@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/radiodan/debug/debug"
+	"github.com/radiodan/debug/builder"
 	"io"
 	"log"
 	"net/http"
@@ -23,7 +23,7 @@ func main() {
 }
 
 func viewResponse(w http.ResponseWriter, req *http.Request) {
-	d := debug.Build()
+	d := builder.Build()
 
 	jsonResponse, err := json.Marshal(d)
 	if err != nil {
@@ -36,7 +36,7 @@ func viewResponse(w http.ResponseWriter, req *http.Request) {
 }
 
 func downloadResponse(w http.ResponseWriter, req *http.Request) {
-	d := debug.Build()
+	d := builder.Build()
 	jsonResponse, err := json.Marshal(d)
 
 	if err != nil {

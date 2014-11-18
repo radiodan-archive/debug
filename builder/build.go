@@ -1,4 +1,4 @@
-package debug
+package builder
 
 import (
 	"encoding/json"
