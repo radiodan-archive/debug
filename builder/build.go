@@ -59,6 +59,10 @@ func fetchDeployFile(app radiodan.RadiodanApplication) (output radiodan.Deploy) 
 
 	err = json.Unmarshal(file, output)
 
+	if err != nil {
+		log.Println("[!] Could not marshal file", err)
+	}
+
 	return
 }
 
