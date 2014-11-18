@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/radiodan/debug/radiodan"
 	"io/ioutil"
 	"log"
 	"net"
@@ -15,43 +16,6 @@ import (
 	"syscall"
 	"time"
 )
-
-type DebugInfo struct {
-	Timestamp          time.Time
-	Hostname           string
-	Addresses          []string
-	InternetConnection bool
-	Applications       []RadiodanApplication
-}
-
-type RadiodanApplication struct {
-	Name      string
-	LogTail   string
-	Pid       int64
-	IsRunning bool
-	Deploy    Deploy
-}
-
-func (r RadiodanApplication) DeployFile() (path string) {
-	path = fmt.Sprintf("/opt/radiodan/apps/%s/current/.deploy", r.Name)
-	return
-}
-
-func (r RadiodanApplication) LogFile() (path string) {
-	path = fmt.Sprintf("/var/log/radiodan-%s.log", r.Name)
-	return
-}
-
-func (r RadiodanApplication) PidFile() (path string) {
-	path = fmt.Sprintf("/var/run/radiodan/radiodan-%s.pid", r.Name)
-	return
-}
-
-type Deploy struct {
-	Name   string
-	Ref    string
-	Commit string
-}
 
 func main() {
 	port := parseFlags()
@@ -73,8 +37,8 @@ func debugResponse(w http.ResponseWriter, req *http.Request) {
 	w.Write(jsonReponse)
 }
 
-func fetchDebugInfo() DebugInfo {
-	d := DebugInfo{Timestamp: time.Now()}
+func fetchDebugInfo() radiodan.DebugInfo {
+	d := radiodan.DebugInfo{Timestamp: time.Now()}
 
 	// fetch ip address(es)
 	d.Hostname = hostname()
@@ -156,7 +120,7 @@ func checkConnection() bool {
 	return string(body) == success
 }
 
-func checkApps() (apps []RadiodanApplication) {
+func checkApps() (apps []radiodan.RadiodanApplication) {
 	appNames := []string{
 		"buttons", "cease", "example", "magic",
 		"server", "updater", "debug",
@@ -169,7 +133,7 @@ func checkApps() (apps []RadiodanApplication) {
 	return
 }
 
-func checkApp(appName string) (app RadiodanApplication) {
+func checkApp(appName string) (app radiodan.RadiodanApplication) {
 	app.Name = appName
 	app.Deploy = fetchDeployFile(app)
 	app.LogTail = fetchLogFile(app)
@@ -178,7 +142,7 @@ func checkApp(appName string) (app RadiodanApplication) {
 	return
 }
 
-func fetchDeployFile(app RadiodanApplication) (output Deploy) {
+func fetchDeployFile(app radiodan.RadiodanApplication) (output radiodan.Deploy) {
 	file, err := ioutil.ReadFile(app.DeployFile())
 
 	if err != nil {
@@ -191,7 +155,7 @@ func fetchDeployFile(app RadiodanApplication) (output Deploy) {
 	return
 }
 
-func fetchLogFile(app RadiodanApplication) (output string) {
+func fetchLogFile(app radiodan.RadiodanApplication) (output string) {
 	path := app.LogFile()
 	_, err := os.Stat(path)
 
@@ -211,7 +175,7 @@ func fetchLogFile(app RadiodanApplication) (output string) {
 	return
 }
 
-func fetchPidFile(app RadiodanApplication) (output int64) {
+func fetchPidFile(app radiodan.RadiodanApplication) (output int64) {
 	path := app.PidFile()
 	file, err := ioutil.ReadFile(path)
 
