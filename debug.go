@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -59,7 +60,8 @@ func downloadResponse(w http.ResponseWriter, req *http.Request) {
 
 	for _, app := range d.Applications {
 		filePath := app.LogFile()
-		fileName := filePath
+		fileElem := strings.Split("/", filePath)
+		fileName := fileElem[len(fileElem)-1]
 
 		file, err := os.Open(filePath)
 		defer file.Close()
