@@ -14,8 +14,8 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/view", viewResponse)
-	http.HandleFunc("/download", downloadResponse)
+	http.HandleFunc("/debug", viewResponse)
+	http.HandleFunc("/debug/download", downloadResponse)
 
 	port := parseFlags()
 	log.Printf("Debug server running on http://127.0.0.1:%d", port)
