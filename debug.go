@@ -21,16 +21,36 @@ type DebugInfo struct {
 	Hostname           string
 	Addresses          []string
 	InternetConnection bool
-	Applications       []DebugApplication
+	Applications       []RadiodanApplication
 }
 
-type DebugApplication struct {
-	Name string
-	// TODO: this should be it's own struct
-	DeployFile string
-	LogFile    string
-	PidFile    int64
-	IsRunning  bool
+type RadiodanApplication struct {
+	Name      string
+	LogTail   string
+	Pid       int64
+	IsRunning bool
+	Deploy    Deploy
+}
+
+func (r RadiodanApplication) DeployFile() (path string) {
+	path = fmt.Sprintf("/opt/radiodan/apps/%s/current/.deploy", r.Name)
+	return
+}
+
+func (r RadiodanApplication) LogFile() (path string) {
+	path = fmt.Sprintf("/var/log/radiodan-%s.log", r.Name)
+	return
+}
+
+func (r RadiodanApplication) PidFile() (path string) {
+	path = fmt.Sprintf("/var/run/radiodan/radiodan-%s.pid", r.Name)
+	return
+}
+
+type Deploy struct {
+	Name   string
+	Ref    string
+	Commit string
 }
 
 func main() {
@@ -136,7 +156,7 @@ func checkConnection() bool {
 	return string(body) == success
 }
 
-func checkApps() (apps []DebugApplication) {
+func checkApps() (apps []RadiodanApplication) {
 	appNames := []string{
 		"buttons", "cease", "example", "magic",
 		"server", "updater", "debug",
@@ -149,35 +169,30 @@ func checkApps() (apps []DebugApplication) {
 	return
 }
 
-func checkApp(appName string) (app DebugApplication) {
+func checkApp(appName string) (app RadiodanApplication) {
 	app.Name = appName
-	app.DeployFile = fetchDeployFile(appName)
-	app.LogFile = fetchLogFile(appName)
-	app.PidFile = fetchPidFile(appName)
-	app.IsRunning = checkProcess(app.PidFile)
+	app.Deploy = fetchDeployFile(app)
+	app.LogTail = fetchLogFile(app)
+	app.Pid = fetchPidFile(app)
+	app.IsRunning = checkProcess(app.Pid)
 	return
 }
 
-func fetchDeployFile(appName string) (output string) {
-	// TODO: pathTemplate should be a method on the struct
-	pathTemplate := "/opt/radiodan/apps/%s/current/.deploy"
-	path := fmt.Sprintf(pathTemplate, appName)
-
-	file, err := ioutil.ReadFile(path)
+func fetchDeployFile(app RadiodanApplication) (output Deploy) {
+	file, err := ioutil.ReadFile(app.DeployFile())
 
 	if err != nil {
-		log.Println("[!] Could not open file", path)
+		log.Println("[!] Could not open file", app.DeployFile())
 		return
 	}
 
-	output = string(file)
+	err = json.Unmarshal(file, output)
 
 	return
 }
 
-func fetchLogFile(appName string) (output string) {
-	// TODO: logpath should be a method on the struct
-	path := fmt.Sprintf("/var/log/radiodan-%s.log", appName)
+func fetchLogFile(app RadiodanApplication) (output string) {
+	path := app.LogFile()
 	_, err := os.Stat(path)
 
 	if err != nil {
@@ -196,10 +211,8 @@ func fetchLogFile(appName string) (output string) {
 	return
 }
 
-func fetchPidFile(appName string) (output int64) {
-	// TODO: pidpath should be a method on the struct
-	pathTemplate := "/var/run/radiodan/radiodan-%s.pid"
-	path := fmt.Sprintf(pathTemplate, appName)
+func fetchPidFile(app RadiodanApplication) (output int64) {
+	path := app.PidFile()
 	file, err := ioutil.ReadFile(path)
 
 	if err != nil {
