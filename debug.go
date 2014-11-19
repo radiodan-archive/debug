@@ -97,7 +97,7 @@ func downloadResponse(w http.ResponseWriter, req *http.Request) {
 }
 
 func parseFlags() (port int) {
-	flag.IntVar(&port, "port", 8080, "Port for server")
+	flag.IntVar(&port, "port", 8090, "Port for server")
 	flag.Parse()
 	return
 }

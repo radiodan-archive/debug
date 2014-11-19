@@ -2,7 +2,7 @@
 
 Debugging endpoint for radiodan devices.
 
-Launches at `http://localhost:8080` by default.
+Launches at `http://localhost:8090` by default.
 
 ## Endpoints
 
